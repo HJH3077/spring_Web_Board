@@ -36,4 +36,6 @@ public interface MyService{
 	// 댓글 삭제
 	int deleteAns(String idx) throws Exception;
 
+	// 비밀번호 체크
+	int selectPwdChk(VO vo) throws Exception;
 }

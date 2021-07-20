@@ -26,50 +26,48 @@ public class MyServiceImpl implements MyService{
 
 	@Override
 	public int InsertVO(VO vo) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+		return myDAO.InsertVO(vo);
 	}
 
 	@Override
 	public int updateHit(String idx) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+		return myDAO.updateHit(idx);
 	}
 
 	@Override
 	public VO selectOneList(String idx) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		return myDAO.selectOneList(idx);
 	}
 
 	@Override
 	public int updateLevUp(Map<String, Integer> map) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int updateList(VO vo) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+		return myDAO.updateLevUp(map);
 	}
 
 	@Override
 	public int InsertAns(VO vo) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+		return myDAO.InsertAns(vo);
 	}
+	
+	@Override
+	public int selectPwdChk(VO vo) throws Exception {
+		return myDAO.selectPwdChk(vo);
+	}
+	
+	@Override
+	public int updateList(VO vo) throws Exception {
+		return myDAO.updateList(vo);
+	}
+
 
 	@Override
 	public int delete(String groups) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+		return myDAO.delete(groups);
 	}
 
 	@Override
 	public int deleteAns(String idx) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+		return myDAO.deleteAns(idx);
 	}
 	
 }

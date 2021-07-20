@@ -26,5 +26,7 @@ public interface MyDAO {
    	int delete(String groups) throws Exception;
    	// 댓글 삭제
    	int deleteAns(String idx) throws Exception;
+   	
+   	int selectPwdChk(VO vo) throws Exception;
 	
 }

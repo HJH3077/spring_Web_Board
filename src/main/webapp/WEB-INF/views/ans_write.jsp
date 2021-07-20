@@ -7,25 +7,15 @@
 <title>Insert title here</title>
 <style type="text/css">
 <style type="text/css">
-td {
-	text-align: center;
-	padding: 15px 10px;
-	background-color: #F6F6F6;
-}
-
-th{
-	text-align: center;
-	padding: 15px 10px;
-	background-color: #B2CCFF;
-}
+td {text-align: center; padding: 15px 10px;	background-color: #F6F6F6;}
+th{	text-align: center;	padding: 15px 10px;	background-color: #B2CCFF;}
 h2{text-align: center;}
 table{width: 800px; margin:10px auto;}
 input{padding: 5px;}
 </style>
-</style>
 <script type="text/javascript">
 	function list_go(f) {
-		f.action="${pageContext.request.contextPath}/MyController?cmd=list&cPage=${cPage}";
+		f.action="list.do?cPage=${cPage}";
 		f.submit();
 	}
 	function ans_write_ok(f) {
@@ -38,7 +28,7 @@ input{padding: 5px;}
 				return;
 			}
 		}
-		f.action="${pageContext.request.contextPath}/MyController?cmd=ans_write_ok";
+		f.action="ans_write_ok.do";
 		f.submit();
 	}
 </script>
@@ -65,7 +55,7 @@ input{padding: 5px;}
 			</tr>
 			<tr>
 				<th>첨부파일</th>
-				<td align="left"><input type="file" name="file_name"></td>
+				<td align="left"><input type="file" name="f_name"></td>
 			</tr>
 			<tr>
 				<th>비밀번호</th>
@@ -73,10 +63,11 @@ input{padding: 5px;}
 			</tr>
 			<tr>
 				<td colspan="2">
-				<input type="button" value="댓글입력" onclick="ans_write_ok(this.form)" /> 
-				<input type="button" value="목록" onclick="list_go(this.form)" /> 
-				<input type="reset" value="취소" />
-				<input type="hidden"  value="${cPage}" name="cPage"> 
+					<input type="button" value="댓글입력" onclick="ans_write_ok(this.form)" /> 
+					<input type="button" value="목록" onclick="list_go(this.form)" /> 
+					<input type="reset" value="취소" />
+					<input type="hidden"  value="${cPage}" name="cPage"> 
+					<input type="hidden"  value="${idx}" name="idx"> 
 				</td>
 			</tr>
             </tbody>

@@ -7,59 +7,19 @@
 <meta charset="UTF-8">
 <title>Insert title here</title>
 <style type="text/css">
-td {
-	text-align: center;
+td {text-align: center;
 	padding: 15px 10px;
-	background-color: #F6F6F6;
-}
-
-th {
-	text-align: center;
+	background-color: #F6F6F6;}
+th {text-align: center;
 	padding: 15px 10px;
-	background-color: #B2CCFF;
-}
-
-h2 {
-	text-align: center;
-}
-
-table {
-	width: 800px;
-	margin: 10px auto;
-}
-
-a {
-	text-decoration: none;
-}
+	background-color: #B2CCFF;}
+h2 {text-align: center;}
+table {	width: 800px;
+		margin: 10px auto;}
+a {	text-decoration: none;}
 </style>
-<script
-	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
 <script type="text/javascript">
-	$.ajax({
-		url : "list_ajax.do",
-		method : "post",
-		data : "cPage=${cPage}",
-		dataType : "json",
-		success : function(data) {
-			var tr = "";
-			var list = data["list"];
-			$.each(list, function() {
-				tr += "<tr>";
-				tr += "<td>" + [ "idx" ] + "</td>";
-				tr += "<td>" + this["writer"] + "</td>";
-				tr += "<td>" + this["title"] + "</td>";
-				tr += "<td>" + this["regdate"].substring(0, 10) + "</td>";
-				tr += "<td>" + this["hit"] + "</td>";
-				tr += "</tr>";
-			})
-
-			$("#tbody").append(tr);
-		},
-		error : function() {
-			alert("읽기실패");
-		}
-	});
-
 	function write_go() {
 		location.href = "write.do?cPage=${cPage}";
 	}
@@ -77,42 +37,61 @@ a {
 				<th style="width: 10%">조회수</th>
 			</tr>
 		</thead>
-		<tbody id="tbody"></tbody>
+		<tbody>
+			<c:choose>
+				<c:when test="${empty list}">
+					<tr><td colspan="5"><h3>원하시는 자료는 존재하지 않습니다.</h3></td></tr>
+				</c:when>
+				<c:otherwise>
+					<c:forEach var="k" items="${list}" varStatus="vs">
+						<tr>
+							<td>${pvo.totalRecord-((pvo.nowPage-1)*pvo.numPerPage+vs.index)}</td>
+							<td style="text-align: left">
+								<c:forEach begin="1" end="${k.step}">&nbsp;&nbsp;[RE]</c:forEach>
+								<a href="onelist.do?idx=${k.idx}&cPage=${cPage}">${k.title}</a></td>
+							<td>${k.writer }</td>
+							<td>${k.regdate.substring(0,10) }</td>
+							<td>${k.hit }</td>
+						</tr>
+					</c:forEach>
+				</c:otherwise>
+			</c:choose>
+		</tbody>
 		<tfoot>
 			<tr>
 				<td colspan="4">
-					<%-- 이전 --%> <c:choose>
+					<%-- 이전 --%> 
+					<c:choose>
 						<c:when test="${pvo.beginBlock <= pvo.pagePerBlock }">
 							<span style="color: gray; padding: 5px; border: 1px solid gray">이전으로</span>
 						</c:when>
 						<c:otherwise>
-							<span
-								style="color: tomato; padding: 5px; border: 1px solid tomato">
-								<a
-								href="${pageContext.request.contextPath}/MyController?cmd=list&cPage=${pvo.beginBlock-pvo.pagePerBlock}">이전으로</a>
+							<span style="color: tomato; padding: 5px; background-color: tomato">
+								<a href="list.do?cPage=${pvo.beginBlock-pvo.pagePerBlock}">이전으로</a>
 							</span>
 						</c:otherwise>
-					</c:choose> &nbsp;&nbsp; <%-- 번호 --%> <c:forEach begin="${pvo.beginBlock }"
-						end="${pvo.endBlock }" step="1" var="k">
+					</c:choose> &nbsp;&nbsp; 
+					<%-- 번호 --%> 
+					<c:forEach begin="${pvo.beginBlock }" end="${pvo.endBlock }" step="1" var="k">
 						<c:choose>
 							<c:when test="${k==pvo.nowPage}">
 								<span style="background-color: tomato; padding: 5px;">${k}</span>
 							</c:when>
 							<c:otherwise>
-								<span style="color: tomato; padding: 5px;"> <a
-									href="${pageContext.request.contextPath}/MyController?cmd=list&cPage=${k}">${k}</a>
+								<span style="color: tomato; padding: 5px;">
+									<a href="list.do?cPage=${k}">${k}</a>
 								</span>
 							</c:otherwise>
 						</c:choose>
-					</c:forEach> &nbsp;&nbsp; <%-- 다음 --%> <c:choose>
+					</c:forEach> &nbsp;&nbsp; 
+					<%-- 다음 --%> 
+					<c:choose>
 						<c:when test="${pvo.endBlock >= pvo.totalPage }">
 							<span style="color: gray; padding: 5px; border: 1px solid gray">다음으로</span>
 						</c:when>
 						<c:otherwise>
-							<span
-								style="color: tomato; padding: 5px; border: 1px solid tomato">
-								<a
-								href="${pageContext.request.contextPath}/MyController?cmd=list&cPage=${pvo.beginBlock+pvo.pagePerBlock}">다음으로</a>
+							<span style="color: tomato; padding: 5px; background-color: tomato">
+								<a href="list.do?cPage=${pvo.beginBlock+pvo.pagePerBlock}">다음으로</a>
 							</span>
 						</c:otherwise>
 					</c:choose>
@@ -125,8 +104,3 @@ a {
 	</table>
 </body>
 </html>
-
-
-
-
-

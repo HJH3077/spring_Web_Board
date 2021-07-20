@@ -3,72 +3,76 @@
  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="bbs_t">
-	<!-- 전체 게시물의 수 (표로나오는게 아니라 숫자이므로 resultType X) -->
-	<select resultType="int" id="count">
-		select count(*) from bbs_t 
+<mapper namespace="board">
+	<!-- 전체 게시물의 수 -->
+	<select id="count" resultType="int">
+		select count(*) from board
 	</select>
-
-	<!-- 시작번호와 끝번호를 받아서 해당 리스트 출력 -->
-	<select resultType="com.ict.vo.BVO" id="list" parameterType="Map">
-		select * from(
-			<!-- bbs_t의 결과를 a라고 하고 r_num을 붙여서 a의 모든 것을 검색 (시작번호 부터 끝 번호까지) -->
-			select ROWNUM r_num, a.* from(select * from bbs_t order by b_idx desc) a) 
-		where r_num between #{begin} and #{end}
+	
+	<!-- 시작번호와 끝번호를 받아서 해당 리스트 출력   -->
+	<!--  원글은 카운트가 groups만 올라가고 step , lev 은 댓글 처리하면서 올라간다.-->
+	<!--  원글은 step과 lev은 무조건 0으로 만들어준다.  -->
+	<!-- rownum으로 글 앞에 번호를 매겨준다 -->
+	<select id="list" parameterType="Map" resultType="com.ict.vo.VO">
+		select * from (
+			select rownum r_num, a.* from (
+				select * from board order by groups desc, lev asc
+			) a
+		) where r_num between #{begin} and #{end}
 	</select>
-
+	
 	<!-- 원글 삽입 -->
-	<insert id="insert" parameterType="com.ict.vo.BVO">
-		insert into bbs_t
-		values(bbs_t_seq.nextval, #{subject}, #{writer}, #{content}, #{file_name}, #{pwd}, sysdate, 0)
+	<insert id="insert" parameterType="com.ict.vo.VO">
+		insert into board
+		values(board_seq.nextval, #{writer}, #{title}, #{content}, #{pwd}, 0,
+		group_seq.nextval, 0, 0, sysdate, #{file_name})
 	</insert>
-
-	<!-- 원글 hit 업데이트 + 원글 상세보기 -->
-	<select resultType="com.ict.vo.BVO" id="onelist" parameterType="String">
-		select * from bbs_t where b_idx = #{b_idx}
-	</select>
-	<update id="hitup" parameterType="String">
-		update bbs_t set hit=hit + 1 where b_idx=#{b_idx}
+	
+	<!-- 조회수 업데이트 -->
+	<update id="updateHit" parameterType="String">
+		update board set hit = hit + 1 where idx = #{idx}
 	</update>
 	
-	<!-- 댓글 불러오기 -->
-	<select resultType="com.ict.vo.CVO" id="clist" parameterType="String">
-		select * from comment_t where b_idx = #{b_idx} order by c_idx desc
+	<!-- 상세보기 -->
+	<select id="onelist" parameterType="String" resultType="com.ict.vo.VO">
+		select * from board where idx = #{idx}
 	</select>
-
+	
+	<!-- 댓글처리를 위한 levUp -->
+	<!-- 댓글 삽입 전에 기존의 lev, groups를 이용해서 원글과 같은 그룹이면서
+		레벨이 같거나 크면 기존 자료의 레벨을 증가 시키자 -->
+	<!-- 모든 원글의 첫번째 댓글은 해당 update가 실행되지 않는다. -->
+	<update id="lev_up" parameterType="Map">
+		update board set lev = lev + 1 where groups=#{groups} and lev >= #{lev} 
+	</update>
+	
 	<!-- 댓글 삽입 -->
-	<insert id="c_insert" parameterType="com.ict.vo.CVO">
-		insert into comment_t 
-		values(comment_t_seq.nextval, null, #{content}, null, sysdate, #{b_idx})
+	<insert id="ans_insert" parameterType="com.ict.vo.VO">
+		insert into board values(board_seq.nextval, #{writer}, #{title}, #{content},
+		#{pwd}, 0, #{groups}, #{step}, #{lev}, sysdate, #{file_name})
 	</insert>
+	
+	<!-- 수정, 삭제 비밀번호 체크 -->
+	<select id="pwd_chk" parameterType="com.ict.vo.VO" resultType="int">
+		select count(*) from board where idx=#{idx} and pwd=#{pwd}
+	</select>
+	
+	<!-- 원글 수정 -->
+	<update id="update" parameterType="com.ict.vo.VO">
+		update board set title=#{title}, content=#{content}, file_name=#{file_name} where idx=#{idx}
+	</update>
+	
+	<!-- 원글 삭제 시 하위 댓글도 모두 삭제 -->
+	<delete id="delete" parameterType="String">
+		delete from board where groups = #{groups}
+	</delete>
 	
 	<!-- 댓글 삭제 -->
-	<delete id="c_delete" parameterType="String">
-		delete from comment_t where c_idx = #{c_idx}
+	<delete id="ans_delete" parameterType="String">
+		delete from board where idx = #{idx}
 	</delete>
-
-	<!-- 게시물의 댓글 모두 삭제 -->
-	<delete id="c_delete_all" parameterType="String">
-		delete from comment_t where b_idx = #{b_idx}
-	</delete>
-
-	<!-- 게시물 삭제 -->
-	<delete id="delete" parameterType="com.ict.vo.BVO">
-		delete from bbs_t where b_idx = #{b_idx}
-	</delete>
-	
-	<!-- 비번 확인 -->
-	<select id="pwd_chk" parameterType="com.ict.vo.BVO" resultType="int">
-		select count(*) from bbs_t where b_idx = #{b_idx} and pwd = #{pwd}
-	</select>
-
-	<update id="update" parameterType="com.ict.vo.BVO">
-		update bbs_t 
-		set subject=#{subject}, writer=#{writer}, content=#{content}, file_name=#{file_name} where b_idx=#{b_idx}
-	</update>
-
-
 </mapper>
+
 
 
 

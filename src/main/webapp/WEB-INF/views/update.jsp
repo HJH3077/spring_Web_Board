@@ -23,14 +23,14 @@ h2{text-align: center;}
 table{width: 800px; margin:10px auto;}
 input{padding: 5px;}
 </style>
-</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script type="text/javascript">
 	function list_go(f) {
-		f.action="${pageContext.request.contextPath}/MyController?cmd=list&cPage=${cPage}";
+		f.action="list.do";
 		f.submit();
 	}
 	function update_ok(f) {
-		// 비밀번호체크
+		/* 비밀번호체크
 		if("${vo.pwd}"==f.pwd.value){
 			f.action="${pageContext.request.contextPath}/MyController?cmd=update_ok";
 			f.submit();
@@ -39,6 +39,34 @@ input{padding: 5px;}
 			f.pwd.value="";
 			f.pwd.focus();
 			return;
+		} */
+		// ajax를 이용해서 비밀번호 맞는지 체크하기
+		var chk = false;
+		$.ajax({
+			url: "pwd_chk.do",
+			method : "post",
+			data : "pwd="+$("#pwd").val()+"&idx=${idx}",
+			dataType : "json",
+			async : false,
+			success : function(data) {
+				if(data=='0'){
+					alert("비밀번호 틀림");
+					$("#pwd").val("");
+					$("#pwd").focus();
+				}else if(data=='1'){
+					alert("비밀번호 맞음");
+					chk = true;
+				}
+			},
+			error :function(){
+				alert("읽기실패");
+			}
+		});
+		
+		// 비밀번호가 일치하면 수행
+		if(chk){
+			f.action ="update_ok.do";
+			f.submit();
 		}
 	}
 </script>
@@ -68,11 +96,11 @@ input{padding: 5px;}
 				<td>
 					<c:choose>
 							<c:when test="${empty vo.file_name }">
-								<input type="file" name="file_name">이전파일없음
+								<input type="file" name="f_name">이전파일없음
 								<input type="hidden" name="old_file_name" value="">
 							</c:when>
 							<c:otherwise>
-								<input type="file" name="file_name"> 이전파일(${vo.file_name})
+								<input type="file" name="f_name"> <img src="resources/upload/${vo.file_name}" style="width: 100px;">(${vo.file_name})
 								<input type="hidden" name="old_file_name" value="${vo.file_name}">
 							</c:otherwise>
 						</c:choose>
@@ -80,7 +108,7 @@ input{padding: 5px;}
 			</tr>
 			<tr>
 				<th>비밀번호</th>
-				<td align="left"><input type="password" name="pwd"></td>
+				<td align="left"><input type="password" name="pwd" id="pwd"></td>
 			</tr>
 			<tr>
 				<td colspan="2">
@@ -88,6 +116,7 @@ input{padding: 5px;}
 				<input type="button" value="목록" onclick="list_go(this.form)" /> 
 				<input type="reset" value="취소" />
 				<input type="hidden" name="cPage" value="${cPage }">
+				<input type="hidden" name="idx" value="${idx }">
 				</td>
 			</tr>
             </tbody>
