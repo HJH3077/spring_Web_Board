@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bbs_t">
+	<!-- 전체 게시물의 수 (표로나오는게 아니라 숫자이므로 resultType X) -->
+	<select resultType="int" id="count">
+		select count(*) from bbs_t 
+	</select>
+
+	<!-- 시작번호와 끝번호를 받아서 해당 리스트 출력 -->
+	<select resultType="com.ict.vo.BVO" id="list" parameterType="Map">
+		select * from(
+			<!-- bbs_t의 결과를 a라고 하고 r_num을 붙여서 a의 모든 것을 검색 (시작번호 부터 끝 번호까지) -->
+			select ROWNUM r_num, a.* from(select * from bbs_t order by b_idx desc) a) 
+		where r_num between #{begin} and #{end}
+	</select>
+
+	<!-- 원글 삽입 -->
+	<insert id="insert" parameterType="com.ict.vo.BVO">
+		insert into bbs_t
+		values(bbs_t_seq.nextval, #{subject}, #{writer}, #{content}, #{file_name}, #{pwd}, sysdate, 0)
+	</insert>
+
+	<!-- 원글 hit 업데이트 + 원글 상세보기 -->
+	<select resultType="com.ict.vo.BVO" id="onelist" parameterType="String">
+		select * from bbs_t where b_idx = #{b_idx}
+	</select>
+	<update id="hitup" parameterType="String">
+		update bbs_t set hit=hit + 1 where b_idx=#{b_idx}
+	</update>
+	
+	<!-- 댓글 불러오기 -->
+	<select resultType="com.ict.vo.CVO" id="clist" parameterType="String">
+		select * from comment_t where b_idx = #{b_idx} order by c_idx desc
+	</select>
+
+	<!-- 댓글 삽입 -->
+	<insert id="c_insert" parameterType="com.ict.vo.CVO">
+		insert into comment_t 
+		values(comment_t_seq.nextval, null, #{content}, null, sysdate, #{b_idx})
+	</insert>
+	
+	<!-- 댓글 삭제 -->
+	<delete id="c_delete" parameterType="String">
+		delete from comment_t where c_idx = #{c_idx}
+	</delete>
+
+	<!-- 게시물의 댓글 모두 삭제 -->
+	<delete id="c_delete_all" parameterType="String">
+		delete from comment_t where b_idx = #{b_idx}
+	</delete>
+
+	<!-- 게시물 삭제 -->
+	<delete id="delete" parameterType="com.ict.vo.BVO">
+		delete from bbs_t where b_idx = #{b_idx}
+	</delete>
+	
+	<!-- 비번 확인 -->
+	<select id="pwd_chk" parameterType="com.ict.vo.BVO" resultType="int">
+		select count(*) from bbs_t where b_idx = #{b_idx} and pwd = #{pwd}
+	</select>
+
+	<update id="update" parameterType="com.ict.vo.BVO">
+		update bbs_t 
+		set subject=#{subject}, writer=#{writer}, content=#{content}, file_name=#{file_name} where b_idx=#{b_idx}
+	</update>
+
+
+</mapper>
+
+
+
+
+
+
